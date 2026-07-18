@@ -4,6 +4,7 @@ import {CustomValidators} from '../shared/custom.validators';
 
 @Component({
   selector: 'app-create-employee',
+  standalone: false,
   templateUrl: './create-employee.component.html',
   styleUrls: ['./create-employee.component.css']
 })

@@ -1,296 +1,146 @@
-<div class="main" style="width: 100%;height: 100%;margin-top: 20px;">
-    <div class="row">
-        <form class="example-form">
-             <img src="../../assets/images/logo.png" alt="Financial Infobean" style="height:100px;width: 200px;margin:20px;"/>
-             <span style="color:rgb(223, 39, 79);font-size:14pt;background-color: cyan;">Global Platform to get the US comapnies details.</span>
-              <div class="ng-autocomplete pull-right"  style="width:40%;margin:20px;color:#ff7f50;border-radius: 25px;height:40px;">
-                <ng-autocomplete
-                 [data]="options"
-                  [searchKeyword]="keyword"
-                  placeholder="Enter the Company Name"
-                  (selected)='selectEvent($event)'
-                  (inputChanged)='onChangeSearch($event)'
-                  (inputFocused)='onFocused($event)'
-                  historyIdentifier="options"
-                  [itemTemplate]="itemTemplate"
-                  [notFoundTemplate]="notFoundTemplate">
-                </ng-autocomplete>
-              
-                <ng-template #itemTemplate let-item>
-                  <a style="color: cornflowerblue;" [innerHTML]="item.Name"></a>
-                </ng-template>
-              
-                <ng-template #notFoundTemplate let-notFound>
-                  <div [innerHTML]="notFound"></div>
-                </ng-template>
-              </div>
-            <!-- </mat-form-field> -->
-          </form>
-    </div>
-    <div *ngIf="isProfile">
-        <div class="row">
-            <div class="col-md-4">
-              <label>Symbol</label>:
-             <label> {{profile.Symbol}}</label>
+<div class="dashboard">
+    <main class="content">
+        <header class="topbar">
+            <div style="flex:1">
+                <div class="search-card">
+                    <input placeholder="Search company or symbol..." [formControl]="myControl" (input)="onChangeSearch($any($event.target).value)" [matAutocomplete]="auto">
+                    <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selectEvent($event.option.value)">
+                        <mat-option *ngFor="let option of options" [value]="option">
+                            {{option.Name}} ({{option.Symbol || option.Code}})
+                        </mat-option>
+                    </mat-autocomplete>
+                    <button class="search-btn">🔍</button>
+                </div>
             </div>
-            <div class="col-md-4">
-                <label>AssetType</label>:
-            <label> {{profile.AssetType}}</label>
+            <div class="top-actions" style="margin-left:16px">
+                <button class="btn">Add to Watchlist</button>
             </div>
-            <div class="col-md-4">
-                <label>Name</label>:
-            <label>{{profile.Name}}</label>
+        </header>
+
+        <section *ngIf="isProfile" class="profile">
+            <div class="profile-header card">
+                <div class="company">
+                    <h2>{{profile?.Name}} <span class="symbol">({{profile?.Symbol}})</span></h2>
+                    <div class="sub">{{profile?.AssetType}} • {{profile?.Industry}}</div>
+                    <div class="meta">{{profile?.Exchange}} &nbsp; | &nbsp; {{profile?.Country}} &nbsp; | &nbsp; {{profile?.Sector}}</div>
+                    <div class="address">{{profile?.Address}}</div>
+                    <div style="margin-top:8px;font-size:18px;color:var(--accent-dark)">Current: <strong *ngIf="displayedPrice">${{displayedPrice}}</strong></div>
+                </div>
+                <div class="price">
+                    <div class="value">{{ formatMarketCap(profile?.MarketCapitalization) }}</div>
+                    <!-- <div class="change up">+6.23 (3.45%)</div>
+                    <div class="small"><span class="market-badge">MARKET OPEN</span></div> -->
+                </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="col-md-4">
-              <label>Exchange</label>:
-             <label> {{profile.Exchange}}</label>
+
+            <div class="grid">
+                <div class="col-lg-8">
+                    <div class="card chart-card">
+                        <div class="chart-header" style="display:flex;justify-content:space-between;align-items:center;">
+                            <div>Price Chart (5Y)</div>
+                            <div class="chart-controls">
+                                <button class="tf-btn" [ngClass]="{active: currentTimeframe==='1D'}" (click)="setTimeframe('1D')">1D</button>
+                                <button class="tf-btn" [ngClass]="{active: currentTimeframe==='1W'}" (click)="setTimeframe('1W')">1W</button>
+                                <button class="tf-btn" [ngClass]="{active: currentTimeframe==='1M'}" (click)="setTimeframe('1M')">1M</button>
+                                <button class="tf-btn" [ngClass]="{active: currentTimeframe==='3M'}" (click)="setTimeframe('3M')">3M</button>
+                                <button class="tf-btn" [ngClass]="{active: currentTimeframe==='6M'}" (click)="setTimeframe('6M')">6M</button>
+                                <button class="tf-btn" [ngClass]="{active: currentTimeframe==='1Y'}" (click)="setTimeframe('1Y')">1Y</button>
+                                <button class="tf-btn" [ngClass]="{active: currentTimeframe==='3Y'}" (click)="setTimeframe('3Y')">3Y</button>
+                                <button class="tf-btn" [ngClass]="{active: currentTimeframe==='5Y'}" (click)="setTimeframe('5Y')">5Y</button>
+                            </div>
+                        </div>
+                        <div class="chart-placeholder">
+                            <canvas #priceChart></canvas>
+                            <div *ngIf="chartErrorMessage" class="chart-error">{{chartErrorMessage}}</div>
+                        </div>
+                    </div>
+
+                    <div class="card stats-row">
+                        <div class="stat">
+                            <div class="title">Performance (vs USD)</div>
+                            <div class="content">1 Day: <span class="green">+3.45%</span></div>
+                        </div>
+                        <div class="stat">
+                            <div class="title">Financials (TTM)</div>
+                            <div class="content">
+                                <div>Revenue: {{profile?.RevenueTTM}}</div>
+                                <div>Gross Profit: {{profile?.GrossProfitTTM}}</div>
+                                <div>EBITDA: {{profile?.EBITDA}}</div>
+                                <div>Net Income: {{profile?.NetIncome}}</div>
+                            </div>
+                        </div>
+                        <div class="stat">
+                            <div class="title">Revenue & Net Income (5Y)</div>
+                            <div class="content">[Mini chart]</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="card key-stats">
+                        <h4>Key Statistics</h4>
+                        <div class="kv"><span>Market Cap</span><strong>{{ formatMarketCap(profile?.MarketCapitalization) }}</strong></div>
+                        <div class="kv"><span>P/E Ratio</span><strong>{{profile?.PERatio}}</strong></div>
+                        <div class="kv"><span>Book Value</span><strong>{{profile?.BookValue}}</strong></div>
+                        <div class="kv"><span>52 Week Low</span><strong>{{profile?.WeekLow52}}</strong></div>
+                        <div class="kv"><span>52 Week High</span><strong>{{profile?.WeekHigh52}}</strong></div>
+                    </div>
+                    <div class="card description">
+                        <h4>Company Description</h4>
+                        <p>{{profile?.Description || profile?.Overview || 'No description available.'}}</p>
+                    </div>
+                </div>
             </div>
-            <div class="col-md-4">
-                <label>Currency</label>:
-            <label> {{profile.Currency}}</label>
+      
+            <div class="col-lg-12">
+                <div class="card financials">
+                    <h4>Financials</h4>
+                    <div class="financial-grid">
+                        <div><strong>FiscalYearEnd:</strong> {{profile?.FiscalYearEnd}}</div>
+                        <div><strong>LatestQuarter:</strong> {{profile?.LatestQuarter}}</div>
+                        <div><strong>MarketCapitalization:</strong> {{ formatMarketCap(profile?.MarketCapitalization) }}</div>
+                        <div><strong>BookValue:</strong> {{profile?.BookValue}}</div>
+                        <div><strong>PERatio:</strong> {{profile?.PERatio}}</div>
+                        <div><strong>PEGRatio:</strong> {{profile?.PEGRatio}}</div>
+                        <div><strong>DividendPerShare:</strong> {{profile?.DividendPerShare}}</div>
+                        <div><strong>EBITDA:</strong> {{profile?.EBITDA}}</div>
+                        <div><strong>RevenuePerShareTTM:</strong> {{profile?.RevenuePerShareTTM}}</div>
+                        <div><strong>ProfitMargin:</strong> {{profile?.ProfitMargin}}</div>
+                        <div><strong>OperatingMarginTTM:</strong> {{profile?.OperatingMarginTTM}}</div>
+                        <div><strong>ReturnOnAssetsTTM:</strong> {{profile?.ReturnOnAssetsTTM}}</div>
+                        <div><strong>ReturnOnEquityTTM:</strong> {{profile?.ReturnOnEquityTTM}}</div>
+                        <div><strong>RevenueTTM:</strong> {{profile?.RevenueTTM}}</div>
+                        <div><strong>GrossProfitTTM:</strong> {{profile?.GrossProfitTTM}}</div>
+                        <div><strong>DilutedEPSTTM:</strong> {{profile?.DilutedEPSTTM}}</div>
+                        <div><strong>QuarterlyEarningsGrowthYOY:</strong> {{profile?.QuarterlyEarningsGrowthYOY}}</div>
+                        <div><strong>QuarterlyRevenueGrowthYOY:</strong> {{profile?.QuarterlyRevenueGrowthYOY}}</div>
+                        <div><strong>EVToRevenue:</strong> {{profile?.EVToRevenue}}</div>
+                        <div><strong>EVToEBITDA:</strong> {{profile?.EVToEBITDA}}</div>
+                    </div>
+                </div>
+
+                <div class="card share-holdings">
+                    <h4>Share Holdings</h4>
+                    <div class="financial-grid">
+                        <div><strong>SharesOutstanding:</strong> {{profile?.SharesOutstanding}}</div>
+                        <div><strong>SharesFloat:</strong> {{profile?.SharesFloat}}</div>
+                        <div><strong>SharesShort:</strong> {{profile?.SharesShort}}</div>
+                        <div><strong>ShortRatio:</strong> {{profile?.ShortRatio}}</div>
+                        <div><strong>SharesShortPriorMonth:</strong> {{profile?.SharesShortPriorMonth}}</div>
+                        <div><strong>ShortPercentOutstanding:</strong> {{profile?.ShortPercentOutstanding}}</div>
+                        <div><strong>ForwardAnnualDividendRate:</strong> {{profile?.ForwardAnnualDividendRate}}</div>
+                        <div><strong>ForwardAnnualDividendYield:</strong> {{profile?.ForwardAnnualDividendYield}}</div>
+                        <div><strong>PayoutRatio:</strong> {{profile?.PayoutRatio}}</div>
+                        <div><strong>DividendDate:</strong> {{profile?.DividendDate}}</div>
+                        <div><strong>ExDividendDate:</strong> {{profile?.ExDividendDate}}</div>
+                        <div><strong>LastSplitFactor:</strong> {{profile?.LastSplitFactor}}</div>
+                        <div><strong>LastSplitDate:</strong> {{profile?.LastSplitDate}}</div>
+                    </div>
+                </div>
             </div>
-            <div class="col-md-4">
-                <label>Country</label>:
-            <label>{{profile.Country}}</label>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-4">
-                <label>Sector</label>:
-            <label>{{profile.Sector}}</label>
-            </div>
-            <div class="col-md-4">
-                <label>Industry</label>:
-            <label>{{profile.Industry}}</label>
-            </div>
-            <div class="col-md-4">
-                <label>Address</label>:
-            <label>{{profile.Address}}</label>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-4">
-                <label>FullTimeEmployees</label>:
-            <label>{{profile.FullTimeEmployees}}</label>
-            </div>
-            <div class="col-md-4">
-                <label>FiscalYearEnd</label>:
-            <label>{{profile.FiscalYearEnd}}</label>
-            </div>
-            <div class="col-md-4">
-                <label>LatestQuarter</label>:
-            <label> {{profile.LatestQuarter}}</label>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-4">
-                <label>MarketCapitalization</label>:
-            <label>{{profile.MarketCapitalization}}</label>
-            </div>
-            <div class="col-md-4">
-                <label>EBITDA</label>:
-            <label>{{profile.EBITDA}}</label>
-            </div>
-            <div class="col-md-4">
-                <label>PERatio</label>:
-            <label>{{profile.PERatio}}</label>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-4">
-                <label>PEGRatio</label>:
-            <label>{{profile.PEGRatio}}</label>
-            </div>
-            <div class="col-md-4">
-                <label>BookValue</label>:
-            <label>{{profile.BookValue}}</label>
-            </div>
-            <div class="col-md-4">
-                <label>DividendPerShare</label>:
-            <label>{{profile.DividendPerShare}}</label>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-4">
-                <label>DividendYield</label>:
-            <label>{{profile.DividendYield}}</label>
-            </div>
-            <div class="col-md-4">
-                <label>EPS</label>:
-            <label>{{profile.EPS}}</label>
-            </div>
-            <div class="col-md-4">
-                <label>RevenuePerShareTTM</label>:
-            <label>{{profile.RevenuePerShareTTM}}</label>
-            </div>
-         </div>
-         <div class="row">
-            <div class="col-md-4">
-                <label>ProfitMargin</label>:
-            <label>{{profile.ProfitMargin}}</label>
-            </div>
-            <div class="col-md-4">
-                <label>OperatingMarginTTM</label>:
-            <label>{{profile.OperatingMarginTTM}}</label>
-            </div>
-            <div class="col-md-4">
-                <label>ReturnOnAssetsTTM</label>:
-            <label>{{profile.ReturnOnAssetsTTM}}</label>
-            </div>
-         </div>
-         <div class="row">
-            <div class="col-md-4">
-                <label>ReturnOnEquityTTM</label>:
-            <label>{{profile.ReturnOnEquityTTM}}</label>
-            </div>
-            <div class="col-md-4">
-                <label>RevenueTTM</label>:
-                  <label>{{profile.RevenueTTM}}</label>
-            </div>
-            <div class="col-md-4">
-                <label>GrossProfitTTM</label>:
-                 <label>{{profile.GrossProfitTTM}}</label>
-            </div>
-         </div>
-         <div class="row">
-            <div class="col-md-4">
-                <label>DilutedEPSTTM</label>:
-            <label>{{profile.DilutedEPSTTM}}</label>
-            </div>
-            <div class="col-md-4">
-                <label>QuarterlyEarningsGrowthYOY</label>:
-            <label>{{profile.QuarterlyEarningsGrowthYOY}}</label>
-            </div>
-            <div class="col-md-4">
-                <label>QuarterlyRevenueGrowthYOY</label>:
-            <label>{{profile.QuarterlyRevenueGrowthYOY}}</label>
-            </div>
-         </div>
-         <div class="row">
-            <div class="col-md-4">
-                <label>PriceToSalesRatioTTM</label>:
-            <label>{{profile.PriceToSalesRatioTTM}}</label>
-            </div>
-            <div class="col-md-4">
-                <label>PriceToBookRatio</label>:
-            <label> {{profile.PriceToBookRatio}}</label>
-            </div>
-            <div class="col-md-4">
-                <label>EVToRevenue</label>:
-            <label>{{profile.EVToRevenue}}</label>
-            </div>
-         </div>
-         <div class="row">
-            <div class="col-md-4">
-                <label>EVToEBITDA</label>:
-            <label>{{profile.EVToEBITDA}}</label>
-            </div>
-            <div class="col-md-4">
-                <label>Beta</label>:
-            <label>{{profile.Beta}}</label>
-            </div>
-            <div class="col-md-4">
-                <label>52 WeekHigh</label>:
-                <label>{{profile.WeekHigh52}}</label>
-            </div>
-         </div>
-        <div class="row">
-            <div class="col-md-4">
-                <label>52 WeekLow</label>:
-            <label> {{profile.WeekLow52}}</label>
-            </div>
-            <div class="col-md-4">
-                <label>50 DayMovingAverage</label>:
-            <label>{{profile.DayMovingAverage50}}</label>
-            </div>
-            <div class="col-md-4">
-                <label>200 DayMovingAverage</label>:
-            <label>{{profile.DayMovingAverage200}}</label>
-            </div>
-         </div>
-         
-         <div class="row">
-            <div class="col-md-4">
-                <label>SharesOutstanding</label>:
-            <label>{{profile.SharesOutstanding}}</label>
-            </div>
-            <div class="col-md-4">
-                <label>SharesFloat</label>:
-            <label>{{profile.SharesFloat}}</label>
-            </div>
-            <div class="col-md-4">
-                <label>SharesShort</label>:
-            <label>{{profile.SharesShort}}</label>
-            </div>
-         </div>
-         <div class="row">
-            <div class="col-md-4">
-                <label>SharesShortPriorMonth</label>:
-            <label>{{profile.SharesShortPriorMonth}}</label>
-            </div>
-            <div class="col-md-4">
-                <label>ShortRatio</label>:
-            <label>{{profile.ShortRatio}}</label>
-            </div>
-            <div class="col-md-4">
-                <label>ShortPercentOutstanding</label>
-            </div>
-         </div>
-         <div class="row">
-            <div class="col-md-4">
-                <label>ForwardAnnualDividendRate</label>:
-            <label>{{profile.ForwardAnnualDividendRate}}</label>
-            </div>
-            <div class="col-md-4">
-                <label>ForwardAnnualDividendYield</label>:
-            <label>{{profile.ForwardAnnualDividendYield}}</label>
-            </div>
-            <div class="col-md-4">
-                <label>PayoutRatio</label>:
-            <label>{{profile.PayoutRatio}}</label>
-            </div>
-         </div>
-         <div class="row">
-            <div class="col-md-4">
-                <label>DividendDate</label>:
-            <label>{{profile.DividendDate}}</label>
-            </div>
-            <div class="col-md-4">
-                <label>ExDividendDate</label>:
-            <label>{{profile.ExDividendDate}}</label>
-            </div>
-            <div class="col-md-4">
-                <label>LastSplitFactor</label>:
-            <label> {{profile.LastSplitFactor}}</label>
-            </div>
-         </div>
-         <div class="row">
-            <div class="col-md-4">
-                <label>LastSplitDate</label>:
-            <label> {{profile.LastSplitDate}}</label>
-            </div>
-            
-         </div> 
-         <br/>
-         <br/>
-         <div class="row">
-          <label style="margin-left:25px;">Company Description</label>:
-          <label style="margin-left:25px;color:white">{{profile.Description}}</label>
-         </div>
-    </div>
-    <div *ngIf="!isProfile" class="main" style="width: 100%;height: 500px;">
-        <br/>
-        <br/>
-        <br/>
-        <hr/>
-        <span>This is a global palatofrm to get the fundamentals of all the comapanies listed in NewYork Stock Exchange. We are trying to help the individuals who intended to get the basic info about listed comapnies with NS.</span>
-    </div>
-        
-    <div class="footer">
-        
-        <span style="margin-left:35%;margin-right:30%;margin-top:20%;">globalplatform@example.com</span>
-    </div>
-    
+        </section>
+        <section *ngIf="!isProfile" class="empty">
+            <div class="card empty-card">Search for a company to view its dashboard.</div>
+        </section>
+    </main>
 </div>

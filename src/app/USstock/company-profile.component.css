@@ -1,29 +1,74 @@
-example-form {
-    min-width: 150px;
-    max-width: 500px;
-    width: 100%;
-  }
-  
-  .example-full-width {
-    width: 100%;
-  }
-  label{
-    font-weight: lighter;
-    margin:10px;
-  }
-  .main{
-     background-color: teal;
-     color:white;
-     margin:0px;
-  }
-  .ng-autocomplete {
-    width:100%;
-    max-width: 600px;
-    display: table;
-    margin: 0 auto;
-  }
-  .footer{
-    background-color: black;
-    height:50px;
-    width:100%;
-  }
+.host, :host {
+  --page-bg: #f6f7f8;
+  --sidebar-bg: #ffffff;
+  --sidebar-border: #e6eef0;
+  --accent: #0ea786;
+  --accent-dark: #0c8f74;
+  --card-bg: #ffffff;
+  --muted: #6b7280;
+  --text: #0b2b2b;
+}
+
+.dashboard{display:flex;min-height:100vh;font-family:Roboto,Arial,Helvetica,sans-serif;background:var(--page-bg);color:var(--text)}
+.sidebar{width:220px;background:var(--sidebar-bg);color:var(--text);padding:24px;box-sizing:border-box;border-right:1px solid var(--sidebar-border)}
+.sidebar .brand{display:flex;flex-direction:row;align-items:center;gap:10px}
+.sidebar img{height:100px}
+.sidebar h3{margin:0;font-size:16px}
+.sidebar small{color:var(--muted)}
+.nav{margin-top:24px;display:flex;flex-direction:column;gap:8px}
+.nav .nav-item{padding:10px 12px;border-radius:8px;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:10px}
+.nav .nav-item.active{background:rgba(14,167,134,0.08);color:var(--accent-dark)}
+.market-status{margin-top:30px;padding:12px;border-radius:6px;color:var(--muted)}
+
+.content{flex:1;padding:20px}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.search{display:flex;align-items:center;gap:8px}
+.search-field{width:640px}
+.search-btn{background:var(--accent);border:none;color:#fff;padding:8px 12px;border-radius:6px;cursor:pointer}
+.top-actions .btn{background:#fff;border:1px solid var(--sidebar-border;padding:8px 12px;border-radius:6px)}
+.search-card{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:8px;background:#fff;border:1px solid var(--sidebar-border);width:100%}
+.search-card input{border:none;outline:none;width:100%;font-size:14px}
+
+.card{background:var(--card-bg);border-radius:8px;padding:16px;box-shadow:0 4px 12px rgba(16,24,40,0.06);margin-bottom:16px;border:1px solid var(--sidebar-border)}
+.profile-header{display:flex;justify-content:space-between;align-items:flex-start;padding:18px;background:var(--card-bg);border-radius:8px;border:1px solid var(--sidebar-border)}
+.profile-header .company h2{margin:0;font-size:20px}
+.profile-header .company .sub{color:var(--muted);margin-top:6px;font-size:13px}
+.profile-header .company .meta{margin-top:10px;color:var(--muted);font-size:13px}
+.profile-header .price{text-align:right}
+.profile-header .price .value{font-size:34px;font-weight:700}
+.profile-header .price .change.up{color:var(--accent-dark);font-weight:600}
+.market-badge{display:inline-block;background:#e6fff8;color:var(--accent-dark);padding:6px 8px;border-radius:6px;font-size:12px;margin-top:6px}
+
+.grid{display:flex;gap:20px}
+.col-lg-8{flex:2;min-width:0}
+.col-lg-4{flex:1}
+.chart-card .chart-placeholder{position:relative;height:300px;border-radius:6px;background:linear-gradient(180deg,#ffffff,#f8fbfb);display:flex;align-items:center;justify-content:center;color:var(--muted);padding:12px}
+.chart-card canvas{width:100% !important;height:100% !important}
+.chart-error{position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);padding:10px 14px;border-radius:10px;background:rgba(255,255,255,0.95);color:#c53030;border:1px solid rgba(197,48,48,0.15);font-size:14px;max-width:80%;text-align:center}
+.chart-controls{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.tf-btn{padding:6px 10px;border-radius:6px;border:1px solid var(--sidebar-border);background:transparent;cursor:pointer;font-size:12px}
+.tf-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+.stats-row{display:flex;gap:12px}
+.stats-row .stat{flex:1}
+.key-stats{background:var(--card-bg);border-radius:8px;padding:12px;border:1px solid var(--sidebar-border)}
+.key-stats .kv{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.04)}
+.key-stats .kv:last-child{border-bottom:none}
+.description p{color:var(--muted);font-size:14px}
+
+.financials{background:var(--card-bg);color:var(--text);padding:20px;border-radius:16px;margin-top:18px;border:1px solid rgba(0,0,0,0.08);box-shadow:0 10px 30px rgba(0,0,0,0.04)}
+.financial-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.financials h4, .share-holdings h4{color:var(--text);margin-bottom:12px}
+.financials .financial-grid div, .share-holdings .financial-grid div{background:transparent;padding:6px 0;font-size:13px;line-height:1.5;color:var(--text);border:none;box-shadow:none}
+.financials .financial-grid div strong, .share-holdings .financial-grid div strong{color:var(--text);font-weight:600;display:inline;margin-bottom:0}
+.share-holdings{background:var(--card-bg);color:var(--text);padding:20px;border-radius:16px;margin-top:12px;border:1px solid rgba(0,0,0,0.08);box-shadow:0 10px 30px rgba(0,0,0,0.04)}
+
+.empty-card{padding:60px;text-align:center;color:var(--muted)}
+
+/* responsive tweaks */
+@media (max-width: 1100px){
+  .sidebar{display:none}
+  .search-field{width:100%}
+  .grid{flex-direction:column}
+  .financial-grid{grid-template-columns:repeat(2,1fr)}
+}
