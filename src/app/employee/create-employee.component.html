@@ -73,8 +73,8 @@
               </button>
             </div>
           </div>
-          <div formArrayName="skills"  *ngFor="let skill of employeeForm.get('skills')['controls']; let i = index">
-            <div [formGroupName]="i">
+          <div formArrayName="skills">
+            <div *ngFor="let skill of skills.controls; let i = index" [formGroupName]="i">
               <div class="form-group"  [ngClass]="{'has-error': formErrors.skillName}">
                 <label class="col-sm-2 control-label" attr.for="{{'skillName'+i}}">
                   Skill
@@ -145,10 +145,10 @@
         <br/> Form Values : {{employeeForm.value | json}}
       </td>
       <td style="padding: 10px">
-        touched : {{employeeForm.get('fullName').touched}}
-        <br/> dirty : {{employeeForm.get('fullName').dirty}}
-        <br/> valid : {{employeeForm.get('fullName').valid}}
-        <br/> FullName Value : {{employeeForm.get('fullName').value}}
+        touched : {{employeeForm.get('fullName')?.touched}}
+        <br/> dirty : {{employeeForm.get('fullName')?.dirty}}
+        <br/> valid : {{employeeForm.get('fullName')?.valid}}
+        <br/> FullName Value : {{employeeForm.get('fullName')?.value}}
       </td>
     </tr>
   </table>

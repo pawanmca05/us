@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import {HttpHeaders,HttpClient} from '@angular/common/http'
+import {HttpHeaders, HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
 
 const API_KEY = 'XYZW51VA7TJHAM2X';
@@ -9,10 +9,10 @@ const API_KEY = 'XYZW51VA7TJHAM2X';
 })
 export class CompanyProfileService {
 
-  constructor(private _httpClient:HttpClient) { }
+  constructor(private _httpClient: HttpClient) { }
 
   getCompanyProfile(val:string):Observable<any>{
-    return this._httpClient.get<Observable<any>>(
+    return this._httpClient.get<any>(
       `https://www.alphavantage.co/query?function=OVERVIEW&symbol=${val}&apikey=${API_KEY}`
     );
   }
@@ -36,8 +36,7 @@ export class CompanyProfileService {
   }
 
   getCompanyList():Observable<any[]> {
-    let headers = new HttpHeaders();
-    headers.set('Content-Type', 'application/json');
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
     return this._httpClient.get<any[]>('assets/companyNames.json',{headers});
   }
 }
